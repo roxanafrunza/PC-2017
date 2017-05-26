@@ -1,0 +1,29 @@
+Frunza Roxana 321CB
+
+Pentru implementarea temei, avem initial doua structuri TClient unde se tin toate
+informatiile citite din fisierul de input in server si TSession unde sunt salvate
+informatii pentru clientii activi (numar card, daca este blocat, sold curent, 
+socketul de pe care s-a logat etc). In server si client, deschidem doua socketuri
+unul UDP (pentru operatiile de unlock) altul pentru TCP (pentru operatiile bancare).
+Avem o multime de descriptori, pe baza carora se face apelul de select.
+
+In server, in functie de socketul activ putem sa citim de la tastatura (singura
+operatie permisa este quit). In momentul in care s-a primit o operatie de quit
+trimitem mesaj pe toate socketurile din multimea de descriptori (inafara de stdin,
+TCP si UDP)ca serverul se inchide. Daca TCP este activ inseamna ca se conecteaza 
+un nou client (il adaugam in multimea de descriptori). Daca vine pe socketul UDP, 
+inseamna ca este o operatie de unlock. Pentru numarul de card primit (dam
+split dupa spatiu la mesajul primit si salvam al doilea cuvant), cerem parola
+de deblocare (trimitem mesaj catre client). Asteptam ca acesta sa trimita
+numar card + parola si verificam daca sunt corecte. Daca este corect, cardul
+se deblocheaza, daca nu deblocarea esueaza. Daca se primeste un mesaj pe alt
+socket inseamna ca am primit un request de la unul din socketii din multimea
+de descriptori. Acest mesaj va fi una din operatiile bancomatului si in functie
+de acestea se executa actiunile corespunzatoare.
+
+In client, putem primi informatii de la tastatura (una din operatiile bancare),
+putem trimite cerere de unlock (prin socketul UDP) sau putem primi un mesaj
+de la server legat de una din operatiile efectuate (prin socketul TCP). In client,
+avem o variabila client_connected care este 1 daca un client este logat (serverul
+a trimis un mesaj de "Welcome"). De asemenea, in momentul in care serverul trimite
+mesaj ca se inchide ("Server is closing"), clientul se va inchide si el. 

@@ -1,0 +1,35 @@
+Frunza Roxana 321CB
+
+Initial declaram doua structuri: una pentru tipul de pachet kermit si una pentru
+headerul din pachetul S. In functie de tipul de pachet, campul data difera. Deci
+am creat cate o functie de initializare pentru fiecare tip de pachet. Pachetul
+de tip S are in campul data o structura data_S, pachetul de tip F are in campul
+data numele fisierului, iar pachetul de tip D are un count bytes de informatie 
+unde count este maxim 250.
+
+In fisierul messages.c, mai sunt implementate functii care calculeaza lungimea
+efectiva in bytes a campului data, care calculeaza cati bytes sunt luati in
+considerare (toate campurile din structura inafara de campul check si mark) si
+care seteaza pentru pachet dat campul check. De asemenea, este implementata o 
+functie care asteapta retrimite un mesaj de 3 ori si asteapta pentru fiecare 
+raspunsul in 5 secunde. Daca dupa 3 retransmiteri, nu am primit raspuns, intoarcem
+NULL, lucru care va duce la intreruperea conexiunii.
+
+In ksender.c, trimitem initial un pachet de tip S. Asteptam raspuns si intrerupem
+conexiunea in caz de timeout. Dupa aceea, pentru fiecare parametru dat la consola,
+trimitem un pachet de tip F. Deschidem fisierul si citim date din el, pe care le
+trimitem folosind pachete de tip D. Pentru fiecare mesaj, astept confirmarea.
+Daca este ACK, se poate trece la urmatorul pachet. Daca este NAK, retransmit mesajul
+pana cand primesc un tip de ACK. Cand am trimis toate datele din fisier, trimit pachet
+de tip Z. Dupa ce am trimis toate fisierele, trimit pachet de tip B.
+
+In kreceiver.c, initial asteptam un pachet de tip S. Pentru acesta, asteptam 15 secunde
+si in caz de timeout, intrerupem conexiunea. Dupa primirea si confirmarea pachetului S, 
+asteptam pachete. Cand primim un pachet, verificam sa aiba SEQ dorit. Daca nu este, 
+asteptam urmatorul pachet. Daca am primit pachetul dorit, verificam suma de control si
+trimitem corespunzator ACK sau NAK. Daca am primit NAK, astept mesajul din nou. NAK se 
+va trimite pana cand ajungem sa primit mesajul corect integral. Dupa confirmarea pachetului,
+in functie de tipul acestuia, executam o anumita instructiune: pentru tipul D, scriem in fisier,
+pentru tipul F, deschidem un fisier cu numele recv_numeprimit, pentru tipul B intrerupem 
+conexiunea iar pentru tipul Z inchidem fisier.
+
